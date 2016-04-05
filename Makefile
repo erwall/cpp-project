@@ -9,7 +9,7 @@ LIB = libproject.a
 LIBOBJS = $(patsubst $(LIBSRC)%.cc, $(LIBOBJ)%.o, $(wildcard $(LIBSRC)*.cc))
 APPOBJS = $(patsubst $(APPSRC)%.cc, $(APPOBJ)%.o, $(wildcard $(APPSRC)*.cc))
 OBJS = $(LIBOBJS) $(APPOBJS)
-APPS = $(addprefix $(BIN), server)
+APPS = $(addprefix $(BIN), myserver)
 
 CC = g++
 

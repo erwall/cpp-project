@@ -1,5 +1,8 @@
 #ifndef NEWSGROUP_H_
 #define NEWSGROUP_H_
+#include "article.h"
+#include <string>
+#include <list>
 
 class Newsgroup
 {
