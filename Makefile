@@ -9,7 +9,7 @@ LIB = libproject.a
 LIBOBJS = $(patsubst $(LIBSRC)%.cc, $(LIBOBJ)%.o, $(wildcard $(LIBSRC)*.cc))
 APPOBJS = $(patsubst $(APPSRC)%.cc, $(APPOBJ)%.o, $(wildcard $(APPSRC)*.cc))
 OBJS = $(LIBOBJS) $(APPOBJS)
-APPS = $(addprefix $(BIN), myserver)
+APPS = $(wildcard $(APPSRC)*.cc)
 
 CC = g++
 
@@ -21,7 +21,10 @@ LDLIBS = -lproject
 .PHONY : all clean
 .PRECIOUS : $(APPOBJ)%.o
 
-all : $(APPS)
+all : folders $(APPS)
+
+folders :
+	mkdir -p bin inc src/app src/lib obj/app obj/lib
 
 $(BIN)% : $(APPOBJ)%.o $(LIB)
 	$(CC) $(LDFLAGS) $(LDLIBS) $^ -o $@
