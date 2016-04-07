@@ -59,27 +59,7 @@ int main(int argc, char* argv[]){
 	cout << "created" << endl;
 	
 	while (true) {
-		
-		// if(conn != nullptr) {
-		// 	if(mh.readNumber() == Protocol::COM_CREATE_NG) {
-
-		// 		cout << mh.readNumber() << endl; // = PAR_STRING
-
-		// 		int sz = mh.readNumber();
-		// 		cout << sz << endl;				// = size
-				
-		// 		string title = mh.readString(sz); 
-		// 		cout << title << endl;
-
-		// 		cout << mh.readNumber() << endl; // = COM_END? fuckar ur vet inte varför
-
-		// 		mh.writeNumber(Protocol::ANS_CREATE_NG);
-		// 		mh.writeNumber(Protocol::ANS_ACK);
-		// 		mh.writeNumber(Protocol::ANS_END);
-				
-		// 	}	
-		// }
-		auto conn = server.waitForActivity();
+				auto conn = server.waitForActivity();
 		MessageHandler mh(*conn.get());
 		if (conn != nullptr) {
 			try {
