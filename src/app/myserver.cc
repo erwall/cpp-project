@@ -1,8 +1,12 @@
 /* myserver.cc: sample server program */
+#include "memserv.h"
+#include "protocol.h"
+#include "messagehandler.h"
+
 #include "server.h"
 #include "connection.h"
 #include "connectionclosedexception.h"
-
+#include "memserv.h"
 #include <memory>
 #include <iostream>
 #include <string>
@@ -51,26 +55,64 @@ int main(int argc, char* argv[]){
 		cerr << "Server initialization error." << endl;
 		exit(1);
 	}
+	MemServ ms;
+	cout << "created" << endl;
 	
 	while (true) {
+		
+		// if(conn != nullptr) {
+		// 	if(mh.readNumber() == Protocol::COM_CREATE_NG) {
+
+		// 		cout << mh.readNumber() << endl; // = PAR_STRING
+
+		// 		int sz = mh.readNumber();
+		// 		cout << sz << endl;				// = size
+				
+		// 		string title = mh.readString(sz); 
+		// 		cout << title << endl;
+
+		// 		cout << mh.readNumber() << endl; // = COM_END? fuckar ur vet inte varför
+
+		// 		mh.writeNumber(Protocol::ANS_CREATE_NG);
+		// 		mh.writeNumber(Protocol::ANS_ACK);
+		// 		mh.writeNumber(Protocol::ANS_END);
+				
+		// 	}	
+		// }
 		auto conn = server.waitForActivity();
+		MessageHandler mh(*conn.get());
 		if (conn != nullptr) {
 			try {
-				int nbr = readNumber(conn);
-				string result;
-				if (nbr > 0) {
-					result = "positive";
-				} else if (nbr == 0) {
-					result = "zero";
-				} else {
-					result = "negative";
+				unsigned char cmd = mh.readNumber();
+				if(cmd == Protocol::COM_LIST_NG) {
+					mh.readNumber(); // com_end
+
+					ms.list();
+
+					mh.writeNumber(Protocol::ANS_LIST_NG);
+					mh.writeNumber(Protocol::ANS_ACK);
+					mh.writeNumber(Protocol::ANS_END);
 				}
-				writeString(conn, result);
-			} catch (ConnectionClosedException&) {
+				else if(cmd == Protocol::COM_CREATE_NG) {  // funkar men validerar ingenting osv
+					
+					mh.readNumber(); // PAR_STRING
+				    int sz = mh.readNumber(); //längd av sträng
+					string title = mh.readString(sz);  // sträng
+					mh.readNumber(); // com_end
+
+					ms.createNG(title);  // skapar newsgroup i memserv, validerar inte atm
+					
+					mh.writeNumber(Protocol::ANS_CREATE_NG);
+					mh.writeNumber(Protocol::ANS_ACK);
+					mh.writeNumber(Protocol::ANS_END);
+				}
+			} 
+			catch (ConnectionClosedException&) {
 				server.deregisterConnection(conn);
 				cout << "Client closed connection" << endl;
 			}
-		} else {
+		} 
+		else {
 			conn = make_shared<Connection>();
 			server.registerConnection(conn);
 			cout << "New client connects" << endl;
