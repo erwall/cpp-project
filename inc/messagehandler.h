@@ -3,6 +3,7 @@
 #include <connection.h>
 #include <string>
 #include <memory>
+#include <iostream>
 
 class MessageHandler {
 	public:
@@ -11,6 +12,9 @@ class MessageHandler {
 		int readNumber();
 		void writeString(const std::string &s);
 		std::string readString();
+		std::string readString(int sz);
+		void writeCode(unsigned char nbr);
+		unsigned char readCode();
 	
 	private:
 		Connection &conn;

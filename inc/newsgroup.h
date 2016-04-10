@@ -2,22 +2,26 @@
 #define NEWSGROUP_H_
 #include "article.h"
 #include <string>
-#include <list>
+#include <vector>
 
-class Newsgroup
+class NewsGroup
 {
 private:
 	std::string name;
-	size_t id;
-	std::list<Article> artlist;
+	int id;
+	std::vector<Article> artVec;
 public:
-	Newsgroup(std::string, size_t);
-	void emplace_back(std::string, std::string, std::string, size_t);
+	NewsGroup(std::string, size_t);
+	void emplace_back(std::string, std::string, std::string, int);
 	void push_back(Article);
 	void remove(Article);
 	Article get(std::string);
-	Article get(size_t);
-
+	Article get(int);
+	int getID();
+	std::string getName();
+	std::vector<Article> get_Art();
+	Article get_Art(int art_id);
+	bool delete_Art(int id);
 };
 
 

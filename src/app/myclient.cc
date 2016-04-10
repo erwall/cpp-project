@@ -61,7 +61,7 @@ int main(int argc, char* argv[]) {
 		string parameters;
 		
 		getline(cin, command);
-		if(command != "list newsgroups") {
+		if(command != "list newsgroups") { // moar sen
 			getline(cin, parameters);
 		}
 		
@@ -69,27 +69,38 @@ int main(int argc, char* argv[]) {
 			// error
 		}
 
-		if(command == "list newsgroups") {
+	 	if(command == "list newsgroups") {              // nåt konstigt testprogram gillar inte
 			mh.writeNumber(Protocol::COM_LIST_NG);
 			mh.writeNumber(Protocol::COM_END);
+
 			mh.readNumber(); // ANS_LIST_NG
+			mh.readNumber(); // PAR_STRING
+			int sz = mh.readNumber(); // STRING SIZE
+			string list = mh.readString(sz);
+
+			cout << list << endl; //
+ 
 			mh.readNumber(); // ANS_ACK
 			mh.readNumber(); // ANS_END
 		}
 
-		else if(command == "create newsgroup") {
-
-			mh.writeNumber(Protocol::COM_CREATE_NG);
-			mh.writeNumber(Protocol::PAR_STRING); 
+		else if(command == "create newsgroup") {         // nåt konstigt testprogram gillar inte
+			cout << "create newsgroup codes" << endl;
+			mh.writeCode(Protocol::COM_CREATE_NG);
+			mh.writeCode(Protocol::PAR_STRING); 
 			mh.writeNumber(parameters.size());
 			mh.writeString(parameters);
-			mh.writeNumber(Protocol::COM_END);
+			mh.writeCode(Protocol::COM_END);
 
-			mh.readNumber(); // ANS_CREATE_NG
-			mh.readNumber(); // ANS_ACK
-			mh.readNumber(); // ANS_END
+			unsigned char start_code = mh.readCode(); // ANS_CREATE_NG
+			unsigned char ack_code = mh.readCode(); // ANS_ACK
+			unsigned char end_code = mh.readCode(); // ANS_END
+			cout << "codes" << endl;
+			cout << (int) start_code << endl;
+			cout << (int) ack_code << endl;
+			cout << (int) end_code << endl;
 		}
-		else if(command == "Delete newsgroup") {
+		else if(command == "delete newsgroup") {
 
 		}
 		

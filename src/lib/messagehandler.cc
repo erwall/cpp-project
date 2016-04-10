@@ -17,7 +17,7 @@ void MessageHandler::writeString(const string& s) {
 	for (char c : s) {
 		conn.write(c);
 	}
-	conn.write('$');
+	//conn.write('$');
 }
 string MessageHandler::readString(int sz) {
 	string s;
@@ -26,10 +26,10 @@ string MessageHandler::readString(int sz) {
 		ch=conn.read();
 		s += ch;
 	}
-	ch = conn.read(); // läser av dollar
-	if(ch != '$') {
-		cout << "String wasn't read correctly" << endl;
-	}
+	// ch = conn.read(); // läser av dollar
+	// if(ch != '$') {
+	// 	cout << "String wasn't read correctly" << endl;
+	// }
 	return s;
 }
 string MessageHandler::readString() {
@@ -39,4 +39,12 @@ string MessageHandler::readString() {
 		s += ch;
 	}
 	return s;
+}
+/*
+trial */
+unsigned char MessageHandler::readCode() {
+	return conn.read();
+}
+void MessageHandler::writeCode(unsigned char nbr) {
+	conn.write(nbr);
 }

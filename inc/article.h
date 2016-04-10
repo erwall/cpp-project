@@ -9,12 +9,13 @@ private:
 	std::string title;
 	std::string author;
 	std::string text;
-	size_t id;
+	int id;
 public:
-	Article(std::string, std::string, std::string, size_t);
+	Article(std::string, std::string, std::string, int);
 	std::string getTitle();
 	std::string getAuthor();
 	std::string getText();
+	int getID();
 };
 
 
