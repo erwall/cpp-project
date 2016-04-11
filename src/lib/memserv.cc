@@ -4,35 +4,68 @@ MemServ::MemServ() {
 
 }
 bool MemServ::createNG(const string &news_group) {
-	ngvec.push_back(NewsGroup(news_group,ngid)); // temp för test
-	++ngid;
-	return true;
+	auto it = find_if(ngvec.begin(), ngvec.end(), [&news_group](pair<int, NewsGroup>& p) {return p.second.getName() == news_group;}); // borde kanske var const pair, men måste ändra getName() och annat skräp till const, funkade inte atm
+	if(it == ngvec.end()) {
+		ngvec.push_back(make_pair(ngid, NewsGroup(news_group,ngid)));
+		++ngid;
+		return true;
+	}
+	return false;
 }
 bool MemServ::removeNG(int news_group_id) {
-	ngvec.erase(ngvec.begin()+news_group_id);
-	--ngid;
-	return true;
+	auto it = find_if(ngvec.begin(), ngvec.end(), [&news_group_id](const pair<int, NewsGroup>& p) {return p.first == news_group_id;});
+	if(it != ngvec.end()) {
+		ngvec.erase(it);
+		--ngid;
+		return true;
+	}
+	return false;
 }
-std::vector<NewsGroup> MemServ::getNG() {
+vector<pair<int, NewsGroup>> MemServ::getNG() {
 	return ngvec;
 }
-void MemServ::listArt() { // test purposes only
-	NewsGroup ng = ngvec[0];
-	vector<Article> artVec = ng.get_Art();
-	for(Article a: artVec) {
-		cout << "list art: " << a.getAuthor() << endl;
+NewsGroup MemServ::getNG(int news_group_id) {
+	auto it = find_if(ngvec.begin(), ngvec.end(), [&news_group_id](const pair<int, NewsGroup>& p) {return p.first == news_group_id;});
+	if(it != ngvec.end()) {
+		return it->second;
+	}
+	// return null?
+}
+void MemServ::listArt(int news_group_id) { // test purposes only
+	auto it = find_if(ngvec.begin(), ngvec.end(), [&news_group_id](const pair<int, NewsGroup>& p) {return p.first == news_group_id;});
+	if(it != ngvec.end()) {
+		NewsGroup ng = it->second;
+		vector<pair<int, Article>> artvec = ng.get_Art();
+		for(pair<int, Article> p: artvec) {
+			cout << "Author: " << p.second.getAuthor() << endl;
+		}
 	}
 }
-std::vector<Article> MemServ::get_Art(int news_group_id) {
-	return ngvec[news_group_id].get_Art();
+vector<pair<int, Article>> MemServ::get_Art(int news_group_id) {
+	auto it = find_if(ngvec.begin(), ngvec.end(), [&news_group_id](const pair<int, NewsGroup>& p) {return p.first == news_group_id;});
+	if(it != ngvec.end()) {
+		return it->second.get_Art();
+	}
 }
 Article MemServ::get_Art(int news_group_id, int art_id) {
-	return ngvec[news_group_id].get_Art(art_id);
+	auto it = find_if(ngvec.begin(), ngvec.end(), [&news_group_id](const pair<int, NewsGroup>& p) {return p.first == news_group_id;});
+	if(it != ngvec.end()) {
+		cout << "Returned author to MemServ::get_art: " << it->second.get_Art(art_id).getAuthor() << endl;
+		return it->second.get_Art(art_id);
+	}
 }
 bool MemServ::delete_Art(int news_group_id, int art_id) {
-	ngvec[news_group_id].delete_Art(art_id);
+	auto it = find_if(ngvec.begin(), ngvec.end(), [&news_group_id](const pair<int, NewsGroup>& p) {return p.first == news_group_id;});
+	if(it != ngvec.end()) {
+		it->second.delete_Art(art_id);
+	}
 	return true;
 }
 bool MemServ::createArt(int news_group_id, string title, string author, string text) {
-	ngvec[news_group_id].emplace_back(title, author, text); // ingen returnc
+	auto it = find_if(ngvec.begin(), ngvec.end(), [&news_group_id](const pair<int, NewsGroup>& p) {return p.first == news_group_id;});
+	if(it != ngvec.end()) {	
+		it->second.createArt(title, author, text); // ingen returnc
+		return true;
+	}
+	return false;
 }

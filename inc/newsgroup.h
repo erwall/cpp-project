@@ -1,26 +1,27 @@
 #ifndef NEWSGROUP_H_
 #define NEWSGROUP_H_
 #include "article.h"
+#include <algorithm>
 #include <string>
 #include <vector>
-
+#include <iostream>
+#include <utility>
 class NewsGroup
 {
 private:
 	std::string name;
 	int id;
 	int artid = 0;
-	std::vector<Article> artVec;
+	std::vector<std::pair<int, Article>> artVec;
 public:
 	NewsGroup(std::string, size_t);
-	void emplace_back(std::string, std::string, std::string);
-	void push_back(Article);
+	bool createArt(std::string, std::string, std::string);
 	void remove(Article);
 	Article get(std::string);
 	Article get(int);
 	int getID();
 	std::string getName();
-	std::vector<Article> get_Art();
+	std::vector<std::pair<int,Article>> get_Art();
 	Article get_Art(int art_id);
 	bool delete_Art(int id);
 };

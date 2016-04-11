@@ -67,59 +67,60 @@ int main(int argc, char* argv[]){
 				cout << "cmd server: " << (int) cmd << endl;
 				
 				if(cmd == Protocol::COM_LIST_NG) { // temporary för test purposes, funkar för testserver atm
-					vector<NewsGroup> ngvec = ms.getNG();
+					vector<pair<int, NewsGroup>> ngvec = ms.getNG();
 					unsigned char c = mh.readCode(); // com_end	
 					mh.writeCode(Protocol::ANS_LIST_NG);
 					mh.writeCode(Protocol::PAR_NUM);
 					mh.writeNumber(ngvec.size());
-					for(NewsGroup ng: ngvec) {
+					for(pair<int, NewsGroup> p: ngvec) {
 						mh.writeCode(Protocol::PAR_NUM);
-						mh.writeNumber(ng.getID());
+						mh.writeNumber(p.first);
 						mh.writeCode(Protocol::PAR_STRING);
-						mh.writeNumber(ng.getName().size());
-						mh.writeString(ng.getName());
+						mh.writeNumber(p.second.getName().size());
+						mh.writeString(p.second.getName());
 					}
 					mh.writeCode(Protocol::ANS_END);
 				}
 				
-				else if(cmd == Protocol::COM_CREATE_NG) {  // funkar men validerar ingenting osv
-					cout << "server Create NG codes" << endl;
-					unsigned char c = mh.readCode(); // PAR_STRING
-				    cout << "PAR STRING: " << (int) c << endl;
-				    int sz = mh.readNumber(); //längd av sträng
-					cout << sz << endl;
-					string title = mh.readString(sz);  // sträng
-					cout << title << endl;
-					unsigned char d = mh.readCode(); // com_end
-					cout << "COM_END: " << (int) d << endl; // fel
-
-					ms.createNG(title);  // skapar newsgroup i memserv, validerar inte atm
-					//ms.list();
+				else if(cmd == Protocol::COM_CREATE_NG) {  
 					
+					unsigned char c = mh.readCode(); // PAR_STRING
+				    int sz = mh.readNumber(); //längd av sträng
+					string title = mh.readString(sz);  // sträng
+					unsigned char d = mh.readCode(); // com_end
 
 					mh.writeCode(Protocol::ANS_CREATE_NG);
-					mh.writeCode(Protocol::ANS_ACK);
-					mh.writeCode(Protocol::ANS_END);
+					if(ms.createNG(title)) {
+						mh.writeCode(Protocol::ANS_ACK);
+						mh.writeCode(Protocol::ANS_END);
+					}
+					else {
+						cout << "here" << endl;
+						mh.writeCode(Protocol::ERR_NG_ALREADY_EXISTS);
+						mh.writeCode(Protocol::ANS_END);
+					}
+					
+
 				}
 				else if(cmd == Protocol::COM_LIST_ART) {
 					mh.readCode(); // PAR_NUM
 					int id = mh.readNumber(); // num_p = id av NG
 					mh.readCode(); // COM_END
 
-					vector<NewsGroup> ngvec = ms.getNG();
-					vector<Article> artvec = ngvec[id].get_Art();
 					
+					NewsGroup ng = ms.getNG(id);
+					vector<pair<int, Article>> artvec = ng.get_Art();
 
 					mh.writeCode(Protocol::ANS_LIST_ART);
 					mh.writeCode(Protocol::ANS_ACK);
 					mh.writeCode(Protocol::PAR_NUM);
 					mh.writeNumber(artvec.size());
-					for(Article a: artvec) {
+					for(pair<int, Article> p: artvec) {
 						mh.writeCode(Protocol::PAR_NUM);
-						mh.writeNumber(a.getID());
+						mh.writeNumber(p.first);
 						mh.writeCode(Protocol::PAR_STRING);
-						mh.writeNumber(a.getTitle().size());
-						mh.writeString(a.getTitle());
+						mh.writeNumber(p.second.getTitle().size());
+						mh.writeString(p.second.getTitle());
 					}
 					mh.writeCode(Protocol::ANS_END);
 
@@ -149,7 +150,7 @@ int main(int argc, char* argv[]){
 					
 					mh.writeCode(Protocol::ANS_ACK);
 					mh.writeCode(Protocol::ANS_END);
-					ms.listArt(); // COM_CREATE_ART skapar ordentligt
+					//ms.listArt(); // COM_CREATE_ART skapar ordentligt
 				}
 				else if(cmd == Protocol::COM_DELETE_NG) { // måste implementera list articles för att ḱunna klicka i servern
 					mh.readCode(); // PAR_NUM;
@@ -171,7 +172,6 @@ int main(int argc, char* argv[]){
 					int artid = mh.readNumber();
 
 					mh.readCode(); // COM_END
-
 					ms.delete_Art(id,artid);
 
 					mh.writeCode(Protocol::ANS_DELETE_ART);
@@ -179,21 +179,20 @@ int main(int argc, char* argv[]){
 					mh.writeCode(Protocol::ANS_ACK);
 					mh.writeCode(Protocol::ANS_END);
 				}
-				else if(cmd == Protocol::COM_GET_ART) { // fel här trorjag
+				else if(cmd == Protocol::COM_GET_ART) { 
 					mh.readCode();	// PAR_NUM
 					int id = mh.readNumber(); // NG id
+					cout << "NGID COM_GET_ART: " << id << endl; // fel? wtf
 
 					mh.readCode(); // PAR_NUM
 					int artid = mh.readNumber(); // art id
-					
+					cout << "ARTID COM_GET_ART: " << artid << endl;  // fel? wtf
 					mh.readCode(); // COM_END
 					
-					cout << "COM_GET_ART artid: " << artid << endl;
-					
 					Article a = ms.get_Art(id, artid); // returnerar fel?
-					cout << "create_art a.getauthor: " << a.getAuthor() << endl;
-					ms.listArt();
-
+					ms.listArt(id);
+					
+					cout << "returned author to COM_GET_ART: " << a.getAuthor() << endl;
 					mh.writeCode(Protocol::ANS_GET_ART);
 					mh.writeCode(Protocol::ANS_ACK);
 

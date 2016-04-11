@@ -6,35 +6,32 @@ NewsGroup::NewsGroup(std::string name, size_t id)
 	this->id = id;
 }
 
-void NewsGroup::emplace_back(std::string title, std::string author, std::string text)
-{
-	artVec.emplace_back(Article(title, author, text, artid));
+bool NewsGroup::createArt(std::string title, std::string author, std::string text) {
+	artVec.push_back(std::make_pair(artid, Article(title, author, text, artid)));
 	artid++;
-}
-
-void NewsGroup::push_back(Article article)
-{
-	artVec.push_back(article);
-	artid++;
+	return true;
 }
 int NewsGroup::getID() {
 	return id;
 }
-bool NewsGroup::delete_Art(int id) { // 
-	artVec.erase(artVec.begin()+id);
-	artid--;
-	std::cout << "Erased article: " << id << std::endl;
-	for(Article a: artVec) {
-		std::cout << "After erase: " << a.getAuthor() << std::endl;
+bool NewsGroup::delete_Art(int art_id) { // 
+	auto it = find_if(artVec.begin(), artVec.end(), [&art_id](const std::pair<int, Article>& p) {return p.first == art_id;});
+	if(it != artVec.end()) {
+		artVec.erase(it);
+		return true;
 	}
-	return true;
+	return false;
+	artid--;
 }
-std::vector<Article> NewsGroup::get_Art() {
+std::vector<std::pair<int, Article>> NewsGroup::get_Art() {
 	return artVec;
 }
 Article NewsGroup::get_Art(int art_id) {
-	std::cout << "returned author: " << artVec[art_id].getAuthor() << std::endl;
-	return artVec[art_id];
+	auto it = find_if(artVec.begin(), artVec.end(), [&art_id](const std::pair<int, Article>& p) {return p.first == art_id;});
+	if(it != artVec.end()) {
+		std::cout << "Author sent from NewsGroup::get_Art: " << it->second.getAuthor() << std::endl;
+		return it->second;
+	}
 }
 std::string NewsGroup::getName() {
 	return name;
