@@ -18,10 +18,10 @@ bool NewsGroup::delete_Art(int art_id) { //
 	auto it = find_if(artVec.begin(), artVec.end(), [&art_id](const std::pair<int, Article>& p) {return p.first == art_id;});
 	if(it != artVec.end()) {
 		artVec.erase(it);
+		artid--;
 		return true;
 	}
 	return false;
-	artid--;
 }
 std::vector<std::pair<int, Article>> NewsGroup::get_Art() {
 	return artVec;
@@ -29,9 +29,9 @@ std::vector<std::pair<int, Article>> NewsGroup::get_Art() {
 Article NewsGroup::get_Art(int art_id) {
 	auto it = find_if(artVec.begin(), artVec.end(), [&art_id](const std::pair<int, Article>& p) {return p.first == art_id;});
 	if(it != artVec.end()) {
-		std::cout << "Author sent from NewsGroup::get_Art: " << it->second.getAuthor() << std::endl;
 		return it->second;
 	}
+	return Article("bad", "bad", "bad", -1); // ART DOES NOT EXIST
 }
 std::string NewsGroup::getName() {
 	return name;

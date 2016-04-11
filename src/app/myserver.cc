@@ -56,17 +56,13 @@ int main(int argc, char* argv[]){
 		exit(1);
 	}
 	MemServ ms;
-	cout << "created" << endl;
-	
 	while (true) {
 		auto conn = server.waitForActivity();
 		if (conn != nullptr) {
 			MessageHandler mh(*conn.get());
 			try {
-				unsigned char cmd = mh.readCode(); // mod
-				cout << "cmd server: " << (int) cmd << endl;
-				
-				if(cmd == Protocol::COM_LIST_NG) { // temporary för test purposes, funkar för testserver atm
+				unsigned char cmd = mh.readCode(); 
+				if(cmd == Protocol::COM_LIST_NG) { 
 					vector<pair<int, NewsGroup>> ngvec = ms.getNG();
 					unsigned char c = mh.readCode(); // com_end	
 					mh.writeCode(Protocol::ANS_LIST_NG);
@@ -92,13 +88,12 @@ int main(int argc, char* argv[]){
 					mh.writeCode(Protocol::ANS_CREATE_NG);
 					if(ms.createNG(title)) {
 						mh.writeCode(Protocol::ANS_ACK);
-						mh.writeCode(Protocol::ANS_END);
 					}
 					else {
-						cout << "here" << endl;
+						mh.writeCode(Protocol::ANS_NAK);
 						mh.writeCode(Protocol::ERR_NG_ALREADY_EXISTS);
-						mh.writeCode(Protocol::ANS_END);
 					}
+					mh.writeCode(Protocol::ANS_END);
 					
 
 				}
@@ -109,18 +104,23 @@ int main(int argc, char* argv[]){
 
 					
 					NewsGroup ng = ms.getNG(id);
-					vector<pair<int, Article>> artvec = ng.get_Art();
-
 					mh.writeCode(Protocol::ANS_LIST_ART);
-					mh.writeCode(Protocol::ANS_ACK);
-					mh.writeCode(Protocol::PAR_NUM);
-					mh.writeNumber(artvec.size());
-					for(pair<int, Article> p: artvec) {
+					if(ng.getID() != -1) {
+						vector<pair<int, Article>> artvec = ng.get_Art();
+						mh.writeCode(Protocol::ANS_ACK);
 						mh.writeCode(Protocol::PAR_NUM);
-						mh.writeNumber(p.first);
-						mh.writeCode(Protocol::PAR_STRING);
-						mh.writeNumber(p.second.getTitle().size());
-						mh.writeString(p.second.getTitle());
+						mh.writeNumber(artvec.size());
+						for(pair<int, Article> p: artvec) {
+							mh.writeCode(Protocol::PAR_NUM);
+							mh.writeNumber(p.first);
+							mh.writeCode(Protocol::PAR_STRING);
+							mh.writeNumber(p.second.getTitle().size());
+							mh.writeString(p.second.getTitle());
+						}
+					}
+					else {
+						mh.writeCode(Protocol::ANS_NAK);
+						mh.writeCode(Protocol::ERR_NG_DOES_NOT_EXIST);
 					}
 					mh.writeCode(Protocol::ANS_END);
 
@@ -146,11 +146,15 @@ int main(int argc, char* argv[]){
 					
 					mh.writeCode(Protocol::ANS_CREATE_ART);
 					
-					ms.createArt(id, title, author, text);
-					
-					mh.writeCode(Protocol::ANS_ACK);
+					if(ms.createArt(id, title, author, text)) {
+						mh.writeCode(Protocol::ANS_ACK);
+					}
+					else {
+						mh.writeCode(Protocol::ANS_NAK);
+						mh.writeCode(Protocol::ERR_NG_DOES_NOT_EXIST);
+					}
 					mh.writeCode(Protocol::ANS_END);
-					//ms.listArt(); // COM_CREATE_ART skapar ordentligt
+					
 				}
 				else if(cmd == Protocol::COM_DELETE_NG) { // måste implementera list articles för att ḱunna klicka i servern
 					mh.readCode(); // PAR_NUM;
@@ -159,10 +163,15 @@ int main(int argc, char* argv[]){
 
 					mh.writeCode(Protocol::ANS_DELETE_NG); 
 					
-					ms.removeNG(id); // inga kontroller
-
-					mh.writeCode(Protocol::ANS_ACK);
+					if(ms.removeNG(id)) {
+						mh.writeCode(Protocol::ANS_ACK);
+					} 
+					else {
+						mh.writeCode(Protocol::ANS_NAK);
+						mh.writeCode(Protocol::ERR_NG_DOES_NOT_EXIST);
+					}
 					mh.writeCode(Protocol::ANS_END);
+
 				}
 				else if(cmd == Protocol::COM_DELETE_ART) { // kräver get article
 					mh.readCode(); // PAR_NUM
@@ -172,42 +181,53 @@ int main(int argc, char* argv[]){
 					int artid = mh.readNumber();
 
 					mh.readCode(); // COM_END
-					ms.delete_Art(id,artid);
-
 					mh.writeCode(Protocol::ANS_DELETE_ART);
-
-					mh.writeCode(Protocol::ANS_ACK);
+					int i = ms.delete_Art(id,artid);
+					if(i == 1) {
+						mh.writeCode(Protocol::ANS_ACK);
+					}
+					else if(i == -2) {
+						mh.writeCode(Protocol::ANS_NAK);
+						mh.writeCode(Protocol::ERR_NG_DOES_NOT_EXIST);
+					}
+					else if(i == -1) {
+						mh.writeCode(Protocol::ANS_NAK);
+						mh.writeCode(Protocol::ERR_ART_DOES_NOT_EXIST);
+					}
 					mh.writeCode(Protocol::ANS_END);
 				}
 				else if(cmd == Protocol::COM_GET_ART) { 
 					mh.readCode();	// PAR_NUM
 					int id = mh.readNumber(); // NG id
-					cout << "NGID COM_GET_ART: " << id << endl; // fel? wtf
 
 					mh.readCode(); // PAR_NUM
-					int artid = mh.readNumber(); // art id
-					cout << "ARTID COM_GET_ART: " << artid << endl;  // fel? wtf
-					mh.readCode(); // COM_END
+					int artid = mh.readNumber(); // art idmh.readCode(); // COM_END
 					
-					Article a = ms.get_Art(id, artid); // returnerar fel?
-					ms.listArt(id);
-					
-					cout << "returned author to COM_GET_ART: " << a.getAuthor() << endl;
+					Article a = ms.get_Art(id, artid); 
 					mh.writeCode(Protocol::ANS_GET_ART);
-					mh.writeCode(Protocol::ANS_ACK);
+					if(a.getID() == -1) {
+						mh.writeCode(Protocol::ANS_NAK);
+						mh.writeCode(Protocol::ERR_ART_DOES_NOT_EXIST);
+					}
+					else if(a.getID() == -2) {
+						mh.writeCode(Protocol::ANS_NAK);
+						mh.writeCode(Protocol::ERR_NG_DOES_NOT_EXIST);
+					}
+					else {
+						mh.writeCode(Protocol::ANS_ACK);
 
-					mh.writeCode(Protocol::PAR_STRING);
-					mh.writeNumber(a.getTitle().size()); // string size1
-					mh.writeString(a.getTitle());
+						mh.writeCode(Protocol::PAR_STRING);
+						mh.writeNumber(a.getTitle().size()); // string size1
+						mh.writeString(a.getTitle());
 
-					mh.writeCode(Protocol::PAR_STRING);
-					mh.writeNumber(a.getAuthor().size()); // string size 2
-					mh.writeString(a.getAuthor());
+						mh.writeCode(Protocol::PAR_STRING);
+						mh.writeNumber(a.getAuthor().size()); // string size 2
+						mh.writeString(a.getAuthor());
 
-					mh.writeCode(Protocol::PAR_STRING);
-					mh.writeNumber(a.getText().size()); // string size 3
-					mh.writeString(a.getText());
-					
+						mh.writeCode(Protocol::PAR_STRING);
+						mh.writeNumber(a.getText().size()); // string size 3
+						mh.writeString(a.getText());
+					}
 					mh.writeCode(Protocol::ANS_END);
 				}
 

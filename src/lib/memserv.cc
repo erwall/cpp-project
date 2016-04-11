@@ -29,7 +29,7 @@ NewsGroup MemServ::getNG(int news_group_id) {
 	if(it != ngvec.end()) {
 		return it->second;
 	}
-	// return null?
+	return NewsGroup("BADBOY", -1);
 }
 void MemServ::listArt(int news_group_id) { // test purposes only
 	auto it = find_if(ngvec.begin(), ngvec.end(), [&news_group_id](const pair<int, NewsGroup>& p) {return p.first == news_group_id;});
@@ -50,16 +50,19 @@ vector<pair<int, Article>> MemServ::get_Art(int news_group_id) {
 Article MemServ::get_Art(int news_group_id, int art_id) {
 	auto it = find_if(ngvec.begin(), ngvec.end(), [&news_group_id](const pair<int, NewsGroup>& p) {return p.first == news_group_id;});
 	if(it != ngvec.end()) {
-		cout << "Returned author to MemServ::get_art: " << it->second.get_Art(art_id).getAuthor() << endl;
 		return it->second.get_Art(art_id);
 	}
+	return Article("bad","bad","bad",-2); // NG_DOES_NOT_EXIST
 }
-bool MemServ::delete_Art(int news_group_id, int art_id) {
+int MemServ::delete_Art(int news_group_id, int art_id) {
 	auto it = find_if(ngvec.begin(), ngvec.end(), [&news_group_id](const pair<int, NewsGroup>& p) {return p.first == news_group_id;});
 	if(it != ngvec.end()) {
-		it->second.delete_Art(art_id);
+		if(it->second.delete_Art(art_id)) {
+			return 1; // passed
+		}
+		return -1; // non-existing article
 	}
-	return true;
+	return -2; // non-existing group
 }
 bool MemServ::createArt(int news_group_id, string title, string author, string text) {
 	auto it = find_if(ngvec.begin(), ngvec.end(), [&news_group_id](const pair<int, NewsGroup>& p) {return p.first == news_group_id;});

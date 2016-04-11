@@ -17,7 +17,7 @@ class MemServ {
 		std::vector<std::pair<int,NewsGroup>> getNG();
 		std::vector<std::pair<int, Article>> get_Art(int news_group_id);
 		Article get_Art(int news_group_id, int art_id);
-		bool delete_Art(int news_group_id, int art_id);
+		int delete_Art(int news_group_id, int art_id);
 		void listArt(int news_group_id);
 		NewsGroup getNG(int id);
 	private:
