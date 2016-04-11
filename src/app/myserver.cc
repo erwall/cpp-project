@@ -105,6 +105,7 @@ int main(int argc, char* argv[]){
 					mh.readCode(); // PAR_NUM
 					int id = mh.readNumber(); // num_p = id av NG
 					mh.readCode(); // COM_END
+
 					vector<NewsGroup> ngvec = ms.getNG();
 					vector<Article> artvec = ngvec[id].get_Art();
 					
@@ -126,7 +127,7 @@ int main(int argc, char* argv[]){
 				else if(cmd == Protocol::COM_CREATE_ART) {
 					
 					mh.readCode(); // PAR_NUM
-					int id = mh.readNumber(); // num_p
+					int id = mh.readNumber(); // num_p = NG ID
 
 					mh.readCode(); // PAR_STRING
 					int sz1 = mh.readNumber(); 
@@ -148,6 +149,7 @@ int main(int argc, char* argv[]){
 					
 					mh.writeCode(Protocol::ANS_ACK);
 					mh.writeCode(Protocol::ANS_END);
+					ms.listArt(); // COM_CREATE_ART skapar ordentligt
 				}
 				else if(cmd == Protocol::COM_DELETE_NG) { // måste implementera list articles för att ḱunna klicka i servern
 					mh.readCode(); // PAR_NUM;
@@ -177,14 +179,20 @@ int main(int argc, char* argv[]){
 					mh.writeCode(Protocol::ANS_ACK);
 					mh.writeCode(Protocol::ANS_END);
 				}
-				else if(cmd == Protocol::COM_GET_ART) {
+				else if(cmd == Protocol::COM_GET_ART) { // fel här trorjag
 					mh.readCode();	// PAR_NUM
 					int id = mh.readNumber(); // NG id
+
 					mh.readCode(); // PAR_NUM
 					int artid = mh.readNumber(); // art id
+					
 					mh.readCode(); // COM_END
-
-					Article a = ms.get_Art(id, artid);
+					
+					cout << "COM_GET_ART artid: " << artid << endl;
+					
+					Article a = ms.get_Art(id, artid); // returnerar fel?
+					cout << "create_art a.getauthor: " << a.getAuthor() << endl;
+					ms.listArt();
 
 					mh.writeCode(Protocol::ANS_GET_ART);
 					mh.writeCode(Protocol::ANS_ACK);

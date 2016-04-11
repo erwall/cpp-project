@@ -9,10 +9,11 @@ class NewsGroup
 private:
 	std::string name;
 	int id;
+	int artid = 0;
 	std::vector<Article> artVec;
 public:
 	NewsGroup(std::string, size_t);
-	void emplace_back(std::string, std::string, std::string, int);
+	void emplace_back(std::string, std::string, std::string);
 	void push_back(Article);
 	void remove(Article);
 	Article get(std::string);

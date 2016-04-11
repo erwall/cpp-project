@@ -17,6 +17,7 @@ class MemServ {
 		std::vector<Article> get_Art(int news_group_id);
 		Article get_Art(int news_group_id, int art_id);
 		bool delete_Art(int news_group_id, int art_id);
+		void listArt();
 	private:
 		std::vector<NewsGroup> ngvec;
 		int ngid=0;
