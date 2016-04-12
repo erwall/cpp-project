@@ -26,6 +26,7 @@
 *.exe
 *.out
 *.app
+bin/
 
 # Eclipse project files
 *.cproject
@@ -33,3 +34,6 @@
 
 # Emacs tempoary files
 *~
+
+# ??
+.settings/
