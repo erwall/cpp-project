@@ -14,7 +14,7 @@ private:
 	int artid = 0;
 	std::vector<std::pair<int, Article>> artVec;
 public:
-	NewsGroup(std::string, size_t);
+	NewsGroup(std::string, int);
 	bool createArt(std::string, std::string, std::string);
 	void remove(Article);
 	Article get(std::string);

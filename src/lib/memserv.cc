@@ -16,7 +16,6 @@ bool MemServ::removeNG(int news_group_id) {
 	auto it = find_if(ngvec.begin(), ngvec.end(), [&news_group_id](const pair<int, NewsGroup>& p) {return p.first == news_group_id;});
 	if(it != ngvec.end()) {
 		ngvec.erase(it);
-		--ngid;
 		return true;
 	}
 	return false;
@@ -70,5 +69,5 @@ bool MemServ::createArt(int news_group_id, string title, string author, string t
 		it->second.createArt(title, author, text); // ingen returnc
 		return true;
 	}
-	return false;
+	return false; // ng does not exst
 }

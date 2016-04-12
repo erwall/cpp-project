@@ -1,6 +1,6 @@
 #include "newsgroup.h"
 #include <iostream>
-NewsGroup::NewsGroup(std::string name, size_t id)
+NewsGroup::NewsGroup(std::string name, int id)
 {
 	this->name = name;
 	this->id = id;
@@ -18,7 +18,6 @@ bool NewsGroup::delete_Art(int art_id) { //
 	auto it = find_if(artVec.begin(), artVec.end(), [&art_id](const std::pair<int, Article>& p) {return p.first == art_id;});
 	if(it != artVec.end()) {
 		artVec.erase(it);
-		artid--;
 		return true;
 	}
 	return false;

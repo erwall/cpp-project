@@ -10,7 +10,6 @@
 class MemServ {
 	public:
 		MemServ();
-		//~MemServ();
 		bool createNG(const std::string& news_group);
 		bool removeNG(int news_group_id);
 		bool createArt(int news_group_id, std::string title, std::string author, std::string text);

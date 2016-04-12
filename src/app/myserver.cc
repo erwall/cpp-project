@@ -1,6 +1,7 @@
 /* myserver.cc: sample server program */
 #include "memserv.h"
 #include "protocol.h"
+#include "diskserv.h"
 #include "messagehandler.h"
 
 #include "server.h"
@@ -14,28 +15,27 @@
 #include <cstdlib>
 
 using namespace std;
-
-/*
- * Read an integer from a client.
- */
-int readNumber(const shared_ptr<Connection>& conn) {
-	unsigned char byte1 = conn->read();
-	unsigned char byte2 = conn->read();
-	unsigned char byte3 = conn->read();
-	unsigned char byte4 = conn->read();
-	return (byte1 << 24) | (byte2 << 16) | (byte3 << 8) | byte4;
-}
-
-/*
- * Send a string to a client.
- */
-void writeString(const shared_ptr<Connection>& conn, const string& s) {
-	for (char c : s) {
-		conn->write(c);
+void read_com_end(MessageHandler& mh, Server& server, const shared_ptr<Connection>& conn) {
+	unsigned char c = mh.readCode();
+	if(c != Protocol::COM_END) {
+		server.deregisterConnection(conn);
+		cout << "Client didn't follow protocol" << endl;
 	}
-	conn->write('$');
 }
-
+void read_par_num(MessageHandler& mh, Server& server, const shared_ptr<Connection>& conn) {
+	unsigned char c = mh.readCode();
+	if(c != Protocol::PAR_NUM) {
+		server.deregisterConnection(conn);
+		cout << "Client didn't follow protocol" << endl;
+	}
+}
+void read_par_string(MessageHandler& mh, Server& server, const shared_ptr<Connection>& conn) {
+	unsigned char c = mh.readCode();
+	if(c != Protocol::PAR_STRING) {
+		server.deregisterConnection(conn);
+		cout << "Client didn't follow protocol" << endl;
+	}
+}
 int main(int argc, char* argv[]){
 	if (argc != 2) {
 		cerr << "Usage: myserver port-number" << endl;
@@ -56,15 +56,16 @@ int main(int argc, char* argv[]){
 		exit(1);
 	}
 	MemServ ms;
+	DiskServ ds;
 	while (true) {
 		auto conn = server.waitForActivity();
 		if (conn != nullptr) {
 			MessageHandler mh(*conn.get());
 			try {
-				unsigned char cmd = mh.readCode(); 
-				if(cmd == Protocol::COM_LIST_NG) { 
+				unsigned char cmd = mh.readCode();
+				if(cmd == Protocol::COM_LIST_NG) {  
 					vector<pair<int, NewsGroup>> ngvec = ms.getNG();
-					unsigned char c = mh.readCode(); // com_end	
+					read_com_end(mh,server,conn); // com_end
 					mh.writeCode(Protocol::ANS_LIST_NG);
 					mh.writeCode(Protocol::PAR_NUM);
 					mh.writeNumber(ngvec.size());
@@ -80,10 +81,10 @@ int main(int argc, char* argv[]){
 				
 				else if(cmd == Protocol::COM_CREATE_NG) {  
 					
-					unsigned char c = mh.readCode(); // PAR_STRING
-				    int sz = mh.readNumber(); //längd av sträng
+					read_par_string(mh, server, conn); // PAR_STRING
+				    int sz = mh.readNumber(); // längd av sträng
 					string title = mh.readString(sz);  // sträng
-					unsigned char d = mh.readCode(); // com_end
+					read_com_end(mh, server, conn); // com_end
 
 					mh.writeCode(Protocol::ANS_CREATE_NG);
 					if(ms.createNG(title)) {
@@ -98,9 +99,9 @@ int main(int argc, char* argv[]){
 
 				}
 				else if(cmd == Protocol::COM_LIST_ART) {
-					mh.readCode(); // PAR_NUM
+					read_par_num(mh, server, conn);; // PAR_NUM
 					int id = mh.readNumber(); // num_p = id av NG
-					mh.readCode(); // COM_END
+					read_com_end(mh, server,conn); // COM_END
 
 					
 					NewsGroup ng = ms.getNG(id);
@@ -127,22 +128,22 @@ int main(int argc, char* argv[]){
 				}
 				else if(cmd == Protocol::COM_CREATE_ART) {
 					
-					mh.readCode(); // PAR_NUM
+					read_par_num(mh, server, conn); // PAR_NUM
 					int id = mh.readNumber(); // num_p = NG ID
 
-					mh.readCode(); // PAR_STRING
+					read_par_string(mh, server, conn); // PAR_STRING
 					int sz1 = mh.readNumber(); 
 					string title = mh.readString(sz1);
 
-					mh.readCode(); // PAR_STRING	
+					read_par_string(mh, server, conn); // PAR_STRING	
 					int sz2 = mh.readNumber();
 					string author = mh.readString(sz2);
 
-					mh.readCode(); // PAR_STRING	
+					read_par_string(mh, server, conn); // PAR_STRING	
 					int sz3 = mh.readNumber();
 					string text = mh.readString(sz3);
 
-					mh.readCode(); //COM_END
+					read_com_end(mh, server, conn); //COM_END
 					
 					mh.writeCode(Protocol::ANS_CREATE_ART);
 					
@@ -157,9 +158,9 @@ int main(int argc, char* argv[]){
 					
 				}
 				else if(cmd == Protocol::COM_DELETE_NG) { // måste implementera list articles för att ḱunna klicka i servern
-					mh.readCode(); // PAR_NUM;
+					read_par_num(mh, server, conn); // PAR_NUM;
 					int id = mh.readNumber();
-					mh.readCode(); // COM_END
+					read_com_end(mh, server, conn); // COM_END
 
 					mh.writeCode(Protocol::ANS_DELETE_NG); 
 					
@@ -174,13 +175,13 @@ int main(int argc, char* argv[]){
 
 				}
 				else if(cmd == Protocol::COM_DELETE_ART) { // kräver get article
-					mh.readCode(); // PAR_NUM
+					read_par_num(mh, server, conn); // PAR_NUM
 					int id = mh.readNumber();
 
-					mh.readCode(); // PAR_NUM
+					read_par_num(mh, server, conn); // PAR_NUM
 					int artid = mh.readNumber();
 
-					mh.readCode(); // COM_END
+					read_com_end(mh, server, conn); // COM_END
 					mh.writeCode(Protocol::ANS_DELETE_ART);
 					int i = ms.delete_Art(id,artid);
 					if(i == 1) {
@@ -196,13 +197,15 @@ int main(int argc, char* argv[]){
 					}
 					mh.writeCode(Protocol::ANS_END);
 				}
-				else if(cmd == Protocol::COM_GET_ART) { 
-					mh.readCode();	// PAR_NUM
+				else if(cmd == Protocol::COM_GET_ART) {
+					read_par_num(mh, server, conn);	// PAR_NUM
 					int id = mh.readNumber(); // NG id
 
-					mh.readCode(); // PAR_NUM
-					int artid = mh.readNumber(); // art idmh.readCode(); // COM_END
+					read_par_num(mh, server, conn); // PAR_NUM
+					int artid = mh.readNumber();  
 					
+					read_com_end(mh, server, conn); // com_end
+
 					Article a = ms.get_Art(id, artid); 
 					mh.writeCode(Protocol::ANS_GET_ART);
 					if(a.getID() == -1) {
@@ -230,7 +233,10 @@ int main(int argc, char* argv[]){
 					}
 					mh.writeCode(Protocol::ANS_END);
 				}
-
+				else {
+					cout << "Server didn't recognize command" << endl;
+					server.deregisterConnection(conn);
+				}
 			} 
 			catch (ConnectionClosedException&) {
 				server.deregisterConnection(conn);
