@@ -69,5 +69,5 @@ bool MemServ::createArt(int news_group_id, string title, string author, string t
 		it->second.createArt(title, author, text); // ingen returnc
 		return true;
 	}
-	return false; // ng does not exst
+	return false; // ng does not exists
 }

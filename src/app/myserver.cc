@@ -55,8 +55,8 @@ int main(int argc, char* argv[]){
 		cerr << "Server initialization error." << endl;
 		exit(1);
 	}
-	MemServ ms;
-	DiskServ ds;
+	//MemServ ms;
+	DiskServ ms;																								;
 	while (true) {
 		auto conn = server.waitForActivity();
 		if (conn != nullptr) {
@@ -107,7 +107,7 @@ int main(int argc, char* argv[]){
 					NewsGroup ng = ms.getNG(id);
 					mh.writeCode(Protocol::ANS_LIST_ART);
 					if(ng.getID() != -1) {
-						vector<pair<int, Article>> artvec = ng.get_Art();
+						vector<pair<int, Article>> artvec = ms.get_Art(id); // moddad för diskserv compatibility
 						mh.writeCode(Protocol::ANS_ACK);
 						mh.writeCode(Protocol::PAR_NUM);
 						mh.writeNumber(artvec.size());
