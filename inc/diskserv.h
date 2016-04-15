@@ -7,7 +7,14 @@
 #include <vector>
 #include <algorithm>
 #include <cstdio>
+#include <unistd.h>
 #include <string>
+#include <stdlib.h>
+#include <string>
+#include <iostream>
+#include <cstdlib>
+#include <fstream>
+#include <sys/stat.h>
 class DiskServ {
 	public:
 		DiskServ();
@@ -21,6 +28,8 @@ class DiskServ {
 		void listArt(int news_group_id);
 		NewsGroup getNG(int id);
 		void listAll(); // for test
+		std::string replace_white_space(std::string& news_group);
+		std::string replace_underscore(std::string& news_group);
 	private:
 		//std::vector<std::pair<int, NewsGroup>> ngvec;
 		int ngid=0;
