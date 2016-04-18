@@ -96,28 +96,31 @@ int main(int argc, char* argv[]) {
 
 	MessageHandler mh(conn);
 	while(true) {
-		string command, name, title, author, text, msg;
+		string command, name, title, author, text, msg, numstring;
 		int cmd, N, ng_id, art_id;
 		unsigned char ans;
 
 		/* Read command and translate to enum */
-		cin >> command;
-		if (command.compare("help"))
+		getline(cin, command);
+
+		if (!command.compare("help"))
 			cmd = 0;
-		else if (command.compare("lsng"))
+		else if (!command.compare("lsng"))
 			cmd = 10;
-		else if (command.compare("mkng"))
+		else if (!command.compare("mkng"))
 			cmd = 11;
-		else if (command.compare("rmng"))
+		else if (!command.compare("rmng"))
 			cmd = 12;
-		else if (command.compare("lsart"))
+		else if (!command.compare("lsart"))
 			cmd = 20;
-		else if (command.compare("mkart"))
+		else if (!command.compare("mkart"))
 			cmd = 21;
-		else if (command.compare("rmart"))
+		else if (!command.compare("rmart"))
 			cmd = 22;
-		else if (command.compare("cat"))
+		else if (!command.compare("cat"))
 			cmd = 23;
+		else
+			cmd = 999;
 
 		/* Handle all commands */
 		switch (cmd) {
@@ -151,7 +154,7 @@ int main(int argc, char* argv[]) {
 					break;
 
 				/* Print newsgroup information */
-				cout << ng_id << "\t " << name << endl;
+				cout << ng_id << "\t" << name << endl;
 			}
 
 			/* Read server finish confirmation */
@@ -163,10 +166,8 @@ int main(int argc, char* argv[]) {
 			break;
 		case Commands::CREATE_NG:
 			/* Read newsgroup name from cin */
-			if (!(cin >> name)) {
-				cout << "Invalid newsgroup name parameter";
-				cout << endl;
-			}
+			cout << "Name: ";
+			getline(cin, name);
 
 			/* Write command to server */
 			mh.writeCode(Protocol::COM_CREATE_NG);
@@ -219,9 +220,12 @@ int main(int argc, char* argv[]) {
 			break;
 		case Commands::DELETE_NG:
 			/* Read newsgroup id from cin */
-			if (!(cin >> ng_id)) {
-				cout << "Invalid parameter. Must be an integer";
-				cout << endl;
+			cout << "Newsgroup id: ";
+			getline(cin, numstring);
+			try {
+				ng_id = stoi(numstring);
+			} catch (exception &e) {
+				cout << e.what() << endl;
 				break;
 			}
 
@@ -276,9 +280,12 @@ int main(int argc, char* argv[]) {
 			break;
 		case Commands::LIST_ART:
 			/* Read newsgroup id from cin */
-			if (!(cin >> ng_id)) {
-				cout << "Invalid newsgroup id parameter";
-				cout << endl;
+			cout << "Newsgroup id: ";
+			getline(cin, numstring);
+			try {
+				ng_id = stoi(numstring);
+			} catch (exception &e) {
+				cout << e.what() << endl;
 				break;
 			}
 
@@ -318,7 +325,7 @@ int main(int argc, char* argv[]) {
 						break;
 
 					/* Print article information */
-					cout << art_id << "\t " << title;
+					cout << art_id << "\t" << title;
 					cout << endl;
 				}
 
@@ -354,28 +361,26 @@ int main(int argc, char* argv[]) {
 			break;
 		case Commands::CREATE_ART:
 			/* Read newsgroup id from cin */
-			if (!(cin >> ng_id)) {
-				cout << "Invalid newsgroup id parameter";
-				cout << endl;
+			cout << "Newsgroup id: ";
+			getline(cin, numstring);
+			try {
+				ng_id = stoi(numstring);
+			} catch (exception &e) {
+				cout << e.what() << endl;
 				break;
 			}
 
 			/* Read article title from cin */
-			if (!(cin >> title)) {
-				cout << "Invalid article name parameter";
-				cout << endl;
-			}
+			cout << "Title: ";
+			getline(cin, title);
+
 			/* Read article author from cin */
-			if (!(cin >> author)) {
-				cout << "Invalid article author name parameter";
-				cout << endl;
-			}
+			cout << "Author: ";
+			getline(cin, author);
 
 			/* Read article text from cin */
-			if (getline(cin, text) < 0) {
-				cout << "Invalid article text parameters";
-				cout << endl;
-			}
+			cout << "Text: ";
+			getline(cin, text);
 
 			/* Write command to server */
 			mh.writeCode(Protocol::COM_CREATE_ART);
@@ -433,16 +438,22 @@ int main(int argc, char* argv[]) {
 			break;
 		case Commands::DELETE_ART:
 			/* Read newsgroup id from cin */
-			if (!(cin >> ng_id)) {
-				cout << "Invalid newsgroup id parameter";
-				cout << endl;
+			cout << "Newsgroup id: ";
+			getline(cin, numstring);
+			try {
+				ng_id = stoi(numstring);
+			} catch (exception &e) {
+				cout << e.what() << endl;
 				break;
 			}
 
 			/* Read article id from cin */
-			if (!(cin >> art_id)) {
-				cout << "Invalid article id parameter";
-				cout << endl;
+			cout << "Article id: ";
+			getline(cin, numstring);
+			try {
+				art_id = stoi(numstring);
+			} catch (exception &e) {
+				cout << e.what() << endl;
 				break;
 			}
 
@@ -471,7 +482,7 @@ int main(int argc, char* argv[]) {
 
 				/* Inform user that article was deleted */
 				cout << "Article with id " << art_id;
-				cout << "in newsgroup with id " << ng_id;
+				cout << " in newsgroup with id " << ng_id;
 				cout << " was deleted" << endl;
 
 				break;
@@ -508,16 +519,22 @@ int main(int argc, char* argv[]) {
 			break;
 		case Commands::GET_ART:
 			/* Read newsgroup id from cin */
-			if (!(cin >> ng_id)) {
-				cout << "Invalid newsgroup id parameter";
-				cout << endl;
+			cout << "Newsgroup id: ";
+			getline(cin, numstring);
+			try {
+				ng_id = stoi(numstring);
+			} catch (exception &e) {
+				cout << e.what() << endl;
 				break;
 			}
 
 			/* Read article id from cin */
-			if (!(cin >> art_id)) {
-				cout << "Invalid article id parameter";
-				cout << endl;
+			cout << "Article id: ";
+			getline(cin, numstring);
+			try {
+				art_id = stoi(numstring);
+			} catch (exception &e) {
+				cout << e.what() << endl;
 				break;
 			}
 
@@ -554,10 +571,10 @@ int main(int argc, char* argv[]) {
 				if (!read_end(&mh))
 					break;
 
-				/* Inform user that article was deleted */
-				cout << "Article with id " << art_id;
-				cout << "in newsgroup with id " << ng_id;
-				cout << " was deleted" << endl;
+				/* Print article */
+				cout << "Title: " << title << endl;
+				cout << "Author: " << author << endl;
+				cout << text << endl;
 
 				break;
 			case Protocol::ANS_NAK:
@@ -592,6 +609,31 @@ int main(int argc, char* argv[]) {
 
 			break;
 		case Commands::HELP:
+			cout << endl;
+			cout << "lsng\t  -\tlist newsgroups" << endl;
+
+			cout << "mkng\t  -\tcreate newsgroup" << endl;
+			cout << "\tNAME" << endl;
+
+			cout << "rmng\t  -\tremove newsgroup" << endl;
+			cout << "\tID" << endl;
+
+			cout << "lsart\t  -\tlist articles" << endl;
+			cout << "\tNGID" << endl;
+
+			cout << "mkart\t  -\tcreate article" << endl;
+			cout << "\tNGID" << endl;
+			cout << "\tTITLE" << endl;
+			cout << "\tAUTHOR" << endl;
+			cout << "\tTEXT" << endl;
+
+			cout << "rmart\t  -\tremove article" << endl;
+			cout << "\tNGID" << endl;
+			cout << "\tARTID" << endl;
+
+			cout << "cat\t  -\tprint article" << endl;
+			cout << "\tNGID" << endl;
+			cout << "\tARTID" << endl;
 			break;
 		default:
 			cout << "Invalid command: " << command << endl;
