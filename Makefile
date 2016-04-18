@@ -3,6 +3,7 @@ LIBSRC = src/lib/
 APPSRC = src/app/
 LIBOBJ = obj/lib/
 APPOBJ = obj/app/
+OBJ = obj/
 BIN = bin/
 LIB = libproject.a
 
@@ -41,4 +42,4 @@ $(LIBOBJ)%.o : $(LIBSRC)%.cc
 	$(CC) -c $(CPPFLAGS) $(CXXFLAGS) $< -o $@
 
 clean :
-	rm -f $(BIN)* $(LIBOBJ)* $(APPOBJ)* $(LIB)
+	rm -rf $(BIN) $(OBJ) $(LIB)
