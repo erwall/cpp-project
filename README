@@ -1,0 +1,6 @@
+CPP 2005 Project, Communication Classes
+---------------------------------------
+- This directory contains folders bin, inc, obj, src and test. Inc contains all the .h files. Src/   app contains all the files with a main function (runnable files). Src/lib contains all the .cc files. Bin contains all the binary files. They can be run form the terminal with the appropriate commands. Test contains the java test files.
+
+- 'make' makes the library libproject.a aswell as the executables myclient and myserver (located in bin)
+
