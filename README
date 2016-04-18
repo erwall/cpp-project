@@ -1,6 +1,11 @@
 CPP 2005 Project, Communication Classes
 ---------------------------------------
-- This directory contains folders bin, inc, obj, src and test. Inc contains all the .h files. Src/   app contains all the files with a main function (runnable files). Src/lib contains all the .cc files. Bin contains all the binary files. They can be run form the terminal with the appropriate commands. Test contains the java test files.
 
-- 'make' makes the library libproject.a aswell as the executables myclient and myserver (located in bin)
+---- GENERAL ----
+- This directory contains folders bin/, inc/, obj/, src/. inc/ contains all the .h files. src/app/ contains all the files .cc with a main function (applications). src/lib/ contains all the .cc files that are needed by the applications. These are compiled into a library "libproject.a". After compilation bin/ contains all the binary files. They can be run form the terminal with the appropriate commands.
 
+---- INSTALLATION ----
+- "make" or "make install" in terminal to compile. "make clean" removes all binaries, object files, the library file and the associated directories.
+
+---- USAGE ----
+- launch bin/myserver with a port number as the only argument to launch server. In another terminal window, launch bin/myclient with "localhost" and the server port number as arguments to connect to the server. Type "help" in client to list functions. Type a function and hit return. Type arguments separated by return, i.e., one argument per line in the terminal window.
