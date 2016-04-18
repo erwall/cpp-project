@@ -21,6 +21,8 @@ LDLIBS = -lproject
 .PHONY : all clean
 .PRECIOUS : $(APPOBJ)%.o
 
+install : all
+
 all : folders $(APPS)
 
 folders :
